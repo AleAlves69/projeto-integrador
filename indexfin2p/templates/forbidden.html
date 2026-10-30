@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Acesso negado | IndexFin{% endblock %}
+{% block content %}
+  <div class="card" style="max-width: 540px; margin: 4rem auto; text-align: center;">
+    <h1>Acesso negado</h1>
+    <p>Você não possui permissão para acessar esta funcionalidade.</p>
+    <a href="{{ url_for('dashboard') }}"><button type="button">Voltar ao início</button></a>
+  </div>
+{% endblock %}

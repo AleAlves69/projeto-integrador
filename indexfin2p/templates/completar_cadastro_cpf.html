@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Complete seu cadastro | IndexFin{% endblock %}
+{% block content %}
+  <div class="login-shell">
+    <section class="login-card">
+      <h1>Complete seu cadastro</h1>
+      <p class="muted">Informe seu CPF para continuar. O dado será armazenado criptografado e não será exibido integralmente nas listagens.</p>
+      {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+      <form method="post" action="{{ url_for('completar_cadastro_cpf', next=request.args.get('next')) }}" class="row g-3">
+        <div class="col-12">
+          <label for="cpf">CPF</label>
+          <input id="cpf" name="cpf" class="form-control" required inputmode="numeric" autocomplete="off" placeholder="___.___.___-__" maxlength="14" data-document="cpf" autofocus>
+          <small class="document-feedback" aria-live="polite"></small>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary w-100">Salvar e continuar</button>
+        </div>
+      </form>
+      <p class="muted text-center mt-3 mb-0"><a href="{{ url_for('logout') }}">Sair</a></p>
+    </section>
+  </div>
+{% endblock %}

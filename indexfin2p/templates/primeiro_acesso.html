@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Primeiro acesso | IndexFin{% endblock %}
+{% block content %}
+  <div class="login-shell">
+    <section class="login-card">
+      <h1>Primeiro acesso</h1>
+      {% if submitted %}
+        <div class="alert alert-success" role="status">
+          Solicitação enviada. O administrador precisa aprovar o cadastro antes do primeiro login.
+        </div>
+        <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Voltar ao login</a>
+      {% else %}
+        <p class="muted">Cadastre uma conta de cliente/empresa ou operacional. O acesso será liberado após a aprovação do administrador.</p>
+        {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+        <form method="post" class="row g-3">
+          <div class="col-12">
+            <label for="full_name">Nome completo</label>
+            <input id="full_name" name="full_name" class="form-control" required minlength="2" maxlength="120" autocomplete="name">
+          </div>
+          <div class="col-12">
+            <label for="cpf">CPF</label>
+            <input id="cpf" name="cpf" class="form-control" required inputmode="numeric" autocomplete="off" placeholder="___.___.___-__" maxlength="14" data-document="cpf">
+            <small class="document-feedback" aria-live="polite"></small>
+          </div>
+          <div class="col-12">
+            <label for="username">Login desejado</label>
+            <input id="username" name="username" class="form-control" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9._-]+" autocomplete="username">
+          </div>
+          <div class="col-12">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" class="form-control" required autocomplete="email">
+          </div>
+          <div class="col-12">
+            <label for="role">Tipo de conta</label>
+            <select id="role" name="role" class="form-select" required>
+              <option value="">Selecione</option>
+              {% for role in roles %}
+                <option value="{{ role }}">{{ 'Cliente / Empresa' if role == 'cliente' else role.replace('_', ' ')|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label for="company_name">Empresa (obrigatório para cliente)</label>
+            <input id="company_name" name="company_name" class="form-control" maxlength="150" list="companies">
+            <datalist id="companies">
+              {% for company in companies %}<option value="{{ company.name }}">{% endfor %}
+            </datalist>
+          </div>
+          <div class="col-12">
+            <label for="company_cnpj">CNPJ da empresa (obrigatório para cliente)</label>
+            <input id="company_cnpj" name="company_cnpj" class="form-control" inputmode="text" autocomplete="off" placeholder="__.___.___/____-__" maxlength="18" data-document="cnpj">
+            <small class="document-feedback" aria-live="polite"></small>
+          </div>
+          <div class="col-12">
+            <label for="password">Criar senha</label>
+            <input id="password" name="password" type="password" class="form-control" required minlength="8" autocomplete="new-password">
+            <small class="muted">Use pelo menos 8 caracteres.</small>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">Enviar cadastro para aprovação</button>
+          </div>
+        </form>
+        <p class="muted text-center mt-3 mb-0"><a href="{{ url_for('login') }}">Voltar ao login</a></p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

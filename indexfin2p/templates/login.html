@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Login | IndexFin{% endblock %}
+{% block content %}
+  <div class="login-shell">
+    <div class="login-card">
+      <h1>Entrar no IndexFin</h1>
+
+      {% if error %}
+        <div class="error" role="alert">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" class="row g-3">
+        <div class="col-12">
+          <label for="username">Usuário</label>
+          <input id="username" name="username" type="text" class="form-control" required>
+        </div>
+
+        <div class="col-12">
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" class="form-control" required>
+        </div>
+
+        <div class="col-12 mt-2">
+          <button type="submit" class="btn btn-primary w-100">Acessar</button>
+        </div>
+      </form>
+
+      {% if sso_providers %}
+        <div class="text-center muted my-3">ou entre com sua conta corporativa</div>
+        <div class="d-grid gap-2">
+          {% for provider, label in sso_providers.items() %}
+            <a class="btn btn-outline-primary" href="{{ url_for('sso_login', provider=provider) }}">Entrar com {{ label }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-between gap-3 flex-wrap mt-3">
+        <a href="{{ url_for('primeiro_acesso') }}">Primeiro acesso</a>
+        <a href="{{ url_for('esqueci_senha') }}">Esqueci minha senha</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

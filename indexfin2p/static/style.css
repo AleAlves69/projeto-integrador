@@ -1,0 +1,211 @@
+:root {
+    --bg: #f4f6f9; /* Cinza claro suave de fundo, idêntico a sistemas premium */
+    --panel: #ffffff;
+    --navy: #0e2240; /* Azul escuro corporativo/contábil principal */
+    --navy-light: #16325c;
+    --primary: #1d4ed8; 
+    
+    /* Tom Ouro/Dourado do template de referência para destaques e links ativos */
+    --gold: #c5a059; 
+    --gold-dark: #aa8241;
+    --gold-soft: rgba(197, 160, 89, 0.12);
+
+    --text: #2c3e50;
+    --muted: #6a7b95;
+    --border: #e2e8f0;
+    
+    --shadow: 0 4px 20px rgba(14, 34, 64, 0.05);
+    --transition: all 0.25s ease-in-out;
+}
+
+* { 
+    box-sizing: border-box; 
+}
+
+html {
+    font-size: 112.5%;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+    background-color: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Navbar Institucional */
+.navbar {
+    background-color: var(--navy) !important;
+    border-bottom: 3px solid var(--gold); /* Linha refinada ouro abaixo do menu */
+    padding: 0.8rem 0;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    background: var(--gold);
+    color: var(--navy) !important;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(197, 160, 89, 0.3);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #ffffff !important;
+    letter-spacing: 0.02em;
+}
+
+/* Links de Navegação */
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5rem 1rem !important;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Estado Ativo (Página Atual Selecionada no Menu) */
+.navbar-nav .nav-link.active {
+    color: var(--gold) !important;
+    font-weight: 700;
+}
+
+/* Caixa de identificação do Usuário */
+.user-pill {
+    padding: 0.45rem 0.9rem;
+    border-radius: 4px;
+    background: var(--navy-light);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.user-avatar {
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+label,
+.form-control,
+.form-select,
+.table,
+.btn {
+    font-size: 1rem;
+}
+
+.page-title {
+    color: var(--navy);
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0;
+    position: relative;
+}
+
+.eyebrow {
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.tracking-wider {
+    letter-spacing: 0.08em;
+}
+
+.text-navy {
+    color: var(--navy);
+}
+
+.border-border {
+    border-color: var(--border) !important;
+}
+
+.document-feedback {
+    display: block;
+    min-height: 1.2em;
+    font-size: 0.85rem;
+}
+
+.document-valid {
+    color: #047857;
+}
+
+.document-invalid {
+    color: #b91c1c;
+}
+
+/* Botões Globais (Primary vira o Dourado Ouro Corporativo) */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0.6rem 1.25rem;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%) !important;
+    border: none !important;
+    color: var(--navy) !important;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(197, 160, 89, 0.25);
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.4);
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 100%) !important;
+}
+
+/* Estilização de Elementos Internos de Todas as Páginas (Cards, Painéis e Tabelas) */
+.card, .table-wrap, .form-card, .panel, .stat-card {
+    background: var(--panel) !important;
+    border: 1px solid var(--border) !important;
+    border-top: 4px solid var(--navy) !important; /* Adiciona o topo azul clássico do modelo em todos os blocos */
+    border-radius: 4px !important; /* Bordas corporativas ligeiramente mais sóbrias */
+    box-shadow: var(--shadow) !important;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Inputs e Seletores Globais */
+.form-control, .form-select, textarea {
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    background-color: #ffffff !important;
+    color: var(--text) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.2) !important;
+}
+
+/* Estilo para Tabelas Internas */
+.table thead th {
+    background-color: #f8fafc !important;
+    color: var(--navy) !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid var(--border) !important;
+}

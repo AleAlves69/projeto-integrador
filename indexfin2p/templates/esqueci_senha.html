@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Recuperar senha | IndexFin{% endblock %}
+{% block content %}
+  <div class="login-shell">
+    <section class="login-card">
+      <h1>Esqueci minha senha</h1>
+      {% if submitted %}
+        <div class="alert alert-success" role="status">
+          Se os dados corresponderem a uma conta, a solicitação será analisada pelo administrador. Entre em contato com ele para confirmar sua identidade e concluir a redefinição.
+        </div>
+        <a href="{{ url_for('login') }}" class="btn btn-primary w-100">Voltar ao login</a>
+      {% else %}
+        <p class="muted">Informe seu login e, se cadastrado, o e-mail da conta. O administrador receberá uma solicitação para redefinir sua senha.</p>
+        <form method="post" class="row g-3">
+          <div class="col-12">
+            <label for="username">Login</label>
+            <input id="username" name="username" class="form-control" required autocomplete="username">
+          </div>
+          <div class="col-12">
+            <label for="email">E-mail cadastrado (opcional)</label>
+            <input id="email" name="email" type="email" class="form-control" autocomplete="email">
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">Solicitar redefinição</button>
+          </div>
+        </form>
+        <p class="muted text-center mt-3 mb-0"><a href="{{ url_for('login') }}">Voltar ao login</a></p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Solicitações | IndexFin{% endblock %}
+{% block content %}
+  <div class="row align-items-center mb-4">
+    <div class="col-12 col-md">
+      <div class="eyebrow mb-1 text-muted text-uppercase tracking-wider">Operações</div>
+      <h1 class="page-title text-navy m-0">Solicitações</h1>
+    </div>
+    <div class="col-12 col-md-auto mt-3 mt-md-0">
+      <a href="{{ url_for('nova_solicitacao') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm">
+        <i class="bi bi-plus-circle-fill me-2" aria-hidden="true"></i>Nova solicitação
+      </a>
+    </div>
+  </div>
+  <hr class="border-border opacity-50 mb-4">
+
+  <section class="panel p-3 p-lg-4">
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Cliente</th>
+            <th>Empresa</th>
+            <th>Status</th>
+            <th>Cotações</th>
+            <th>Orçamento final</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for request in requests %}
+            <tr>
+              <td>{{ request.id }}</td>
+              <td>{{ request.title }}</td>
+              <td>{{ request.client_name }}</td>
+              <td>{{ request.company_name or 'Não informado' }}</td>
+              <td><span class="status-badge status-{{ request.status|lower|replace(' ', '-')|replace('_', '-')|replace('ã', 'a')|replace('ç', 'c') }}">{{ request.status|replace('_', ' ')|capitalize }}</span></td>
+              <td>{{ request.total_quotes }}</td>
+              <td>R$ {{ '%.2f'|format(request.final_total or 0) }}</td>
+              <td><a href="{{ url_for('detalhe_solicitacao', request_id=request.id) }}" class="btn btn-sm btn-outline-primary">Detalhes</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

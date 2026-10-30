@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Painel de gestão | IndexFin{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <p class="eyebrow">Painel de gestão</p>
+    <h1 class="page-title">Painel de gestão</h1>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Solicitações</div>
+        <div class="stat-value">{{ total_requests }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Cotações</div>
+        <div class="stat-value">{{ total_quotes }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Fornecedores</div>
+        <div class="stat-value">{{ total_suppliers }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-label">Orçamentos</div>
+        <div class="stat-value">{{ total_budgets }}</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="panel p-3 p-lg-4">
+    <div class="section-head">
+      <h2 class="card-title mb-0">Solicitações recentes</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Empresa</th>
+            <th>Status</th>
+            <th>Orçamento inicial</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for request in recent_requests %}
+            <tr>
+              <td>{{ request.id }}</td>
+              <td>{{ request.client_name }}</td>
+              <td>{{ request.company_name or 'Não informado' }}</td>
+              <td><span class="status-badge status-{{ request.status|lower|replace(' ', '-')|replace('_', '-')|replace('ã', 'a')|replace('ç', 'c') }}">{{ request.status|replace('_', ' ')|capitalize }}</span></td>
+              <td>R$ {{ '%.2f'|format(request.initial_budget) }}</td>
+              <td><a href="{{ url_for('detalhe_solicitacao', request_id=request.id) }}" class="btn btn-sm btn-outline-primary">Abrir</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

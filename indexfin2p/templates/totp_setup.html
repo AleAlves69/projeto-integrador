@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Configurar autenticação em duas etapas | IndexFin{% endblock %}
+{% block content %}
+  <div class="login-shell">
+    <section class="login-card">
+      <h1>Ative a verificação em duas etapas</h1>
+      <p class="muted">Esta etapa é obrigatória para administradores, operadores e auditores. Configure um aplicativo autenticador, como Google Authenticator ou Microsoft Authenticator.</p>
+      {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+      <ol class="ps-3">
+        <li>Adicione uma conta no aplicativo autenticador.</li>
+        <li>Escolha inserir a chave manualmente e use os dados abaixo.</li>
+        <li>Informe o código de 6 dígitos gerado para confirmar.</li>
+      </ol>
+      <div class="alert alert-info">
+        <strong>Conta:</strong> {{ username }}<br>
+        <strong>Chave de configuração:</strong><br>
+        <code class="user-select-all">{{ secret }}</code>
+      </div>
+      <form method="post" class="row g-3">
+        <div class="col-12">
+          <label for="code">Código do aplicativo</label>
+          <input id="code" name="code" class="form-control" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,8}" minlength="6" maxlength="8" required autofocus>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-primary w-100" type="submit">Confirmar e ativar</button>
+        </div>
+      </form>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,112 @@
+INDEXFIN - PREPARAÇÃO FISCAL E NOTA FISCAL
+Escopo atual, segurança e evolução futura
+Versão: 1.1 | Data: 2026-10-12
+
+1. STATUS E DECISÃO
+
+A aplicação possui uma área de preparação fiscal para cadastro de emitentes e
+rascunhos internos associados a solicitações aprovadas. Esses registros não
+são notas fiscais, não têm validade fiscal e não são transmitidos.
+
+O projeto atual é uma aplicação Flask com banco SQLite. Na inspeção desta
+versão, não foram encontrados módulos de emissão fiscal, rotas de NF ou
+tabelas de NF no schema.sql. Portanto, as referências do documento de origem
+a FastAPI, Nuxt, Alembic, tabelas/procedure/trigger de NF e caminhos
+apps/backend/app/ não descrevem este repositório.
+
+A emissão real depende da escolha e configuração de um provedor/API, além da
+validação dos requisitos fiscais e do ambiente de homologação.
+
+2. FUNCIONALIDADES FORA DO ESCOPO
+
+Ainda não estão implementados:
+
+- Emissão manual ou automática de NF.
+- Integração ou transmissão para a SEFAZ.
+- Geração ou validação de chave de acesso.
+- Geração, assinatura, armazenamento ou transmissão de XML.
+- Uso de certificado digital A1/A3 ou de credenciais SEFAZ.
+- Consulta, cancelamento ou correção de NF.
+- Geração de DANFE ou envio de documento fiscal por e-mail.
+- Conciliação fiscal e contingência de emissão.
+
+O schema SQLite guarda somente cadastros de emitentes e rascunhos internos;
+não contém tabelas ou dados de notas autorizadas. Não há numeração fiscal,
+chave de acesso, XML, impostos calculados, assinatura ou DANFE.
+
+3. REGRAS PARA PRESERVAR O MVP
+
+- A área está disponível somente para administradores e operadores financeiros.
+- Somente administradores cadastram emitentes; perfis fiscais não guardam
+  certificados, senhas ou tokens.
+- Rascunhos só podem ser criados para solicitações aprovadas com orçamento e
+  CNPJ do cliente. Há no máximo um rascunho de cada tipo por solicitação.
+- Os tipos NF-e e NFS-e servem apenas para organizar a preparação; a seleção
+  não determina o enquadramento fiscal.
+- A aplicação continua funcionando sem provedor, certificado, credenciais ou
+  serviço externo.
+- Antes de uma futura implementação, atualizar esta documentação com o
+  escopo aprovado e criar testes automatizados adequados à estrutura real do
+  projeto. O repositório atual não contém configuração de CI que garanta as
+  seis checagens citadas no documento de origem.
+
+4. SEGURANÇA PARA UMA IMPLEMENTAÇÃO FUTURA
+
+Dados fiscais, chaves, XML, certificados e credenciais exigem controle de
+acesso, proteção em trânsito e em repouso, auditoria e tratamento seguro de
+erros. Não devem aparecer em logs, mensagens de erro, URLs ou páginas públicas.
+Evitar registrar também conteúdo integral de requisições e respostas fiscais.
+
+Certificados e senhas devem ficar em um gerenciador de segredos apropriado,
+nunca no repositório ou em arquivos de configuração versionados. Uma chave de
+criptografia deve ser distinta da chave usada para proteger os CPFs. Definir
+backup, recuperação e rotação antes de armazenar qualquer segredo.
+
+O projeto já exige CPF_ENCRYPTION_KEY persistente em produção para os CPFs.
+Essa chave não deve ser reutilizada para dados fiscais; perder ou trocar a
+chave impede recuperar os dados que ela protege.
+
+O acesso a XML e outros documentos deve ser autorizado por usuário e vínculo
+com a operação correspondente, com auditoria de downloads. Definir retenção,
+exclusão e backup conforme a legislação e orientação contábil/jurídica
+aplicáveis; os prazos devem ser confirmados antes de serem implementados.
+
+5. DIRETRIZES DE ARQUITETURA FUTURA
+
+Quando a etapa de NF for aprovada:
+
+- Isolar integração, modelos, serviços e rotas fiscais em módulo próprio.
+- Manter os imports e registro das rotas condicionados a uma feature flag
+  desativada por padrão; sem ativação, os módulos fiscais não devem ser
+  importados e o MVP não deve depender de configuração fiscal.
+- Usar ambiente de homologação antes de qualquer operação de produção.
+- Implementar idempotência e transações para prevenir emissão duplicada e
+  inconsistência entre pedido, estoque e documento fiscal.
+- Armazenar XML em armazenamento privado apropriado, mantendo no banco apenas
+  metadados e a referência segura ao objeto, se essa arquitetura for aprovada.
+- Não presumir formato, validade ou regras legais de chave, XML, assinatura ou
+  retenção: validar os requisitos vigentes com a SEFAZ e especialistas fiscais.
+- Definir testes de autorização, vazamento em logs, falha de transmissão,
+  duplicidade, rollback, cancelamento e recuperação antes da ativação.
+
+Uma feature flag futura deverá permanecer desativada por padrão e permitir
+desabilitar as rotas/ações fiscais sem afetar autenticação, solicitações,
+cotações ou demais fluxos do MVP. O nome e o local da configuração devem
+seguir os padrões do projeto quando a implementação for iniciada.
+
+6. CHECKLIST ANTES DA FASE FISCAL
+
+[ ] Requisitos fiscais e responsabilidades aprovados por especialistas.
+[ ] Provedor/API escolhido e conta empresarial contratada/configurada.
+[ ] Provedor, UF, regime tributário e ambiente definidos.
+[ ] Certificado e credenciais provisionados em gerenciador de segredos.
+[ ] Estratégia de criptografia, backup, recuperação e rotação testada.
+[ ] Armazenamento privado e política de retenção definidos.
+[ ] Módulo isolado, rotas protegidas e flag desativada por padrão.
+[ ] Testes automatizados e verificações de CI adicionados ao projeto real.
+[ ] Homologação concluída; plano de ativação e rollback revisados.
+[ ] Logs e mensagens de erro verificados para não expor dados fiscais.
+
+Os rascunhos existentes são registros operacionais internos, não substituem
+validação contábil, jurídica ou técnica e não autorizam cobrança ou circulação
+de mercadoria/prestação de serviço como documento fiscal.

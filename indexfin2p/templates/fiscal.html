@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Preparação fiscal | IndexFin{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <p class="eyebrow">Documentos fiscais</p>
+    <h1 class="page-title">Preparação fiscal</h1>
+    <div class="alert alert-warning mt-3 mb-0" role="alert">
+      <strong>Área preparatória:</strong> os registros abaixo são rascunhos internos.
+      Não são notas fiscais, não têm validade fiscal e não são transmitidos à SEFAZ ou à prefeitura.
+    </div>
+  </div>
+
+  {% if error %}
+    <div class="error mt-3" role="alert">{{ error }}</div>
+  {% endif %}
+
+  {% if current_user.role == 'admin' %}
+    <section class="panel p-3 p-lg-4 mb-4">
+      <h2 class="card-title">Cadastrar emitente</h2>
+      <p class="muted">Informe os dados da empresa que futuramente será configurada no provedor fiscal. Nenhum certificado ou segredo deve ser cadastrado nesta tela.</p>
+      <form method="post" action="{{ url_for('create_fiscal_issuer') }}" class="row g-3">
+        <div class="col-md-8">
+          <label for="legal_name">Razão social</label>
+          <input id="legal_name" name="legal_name" class="form-control" required minlength="2" maxlength="200">
+        </div>
+        <div class="col-md-4">
+          <label for="issuer_cnpj">CNPJ</label>
+          <input id="issuer_cnpj" name="cnpj" class="form-control" required autocomplete="off" maxlength="18" placeholder="__.___.___/____-__" data-document="cnpj">
+          <small class="document-feedback" aria-live="polite"></small>
+        </div>
+        <div class="col-md-4">
+          <label for="state_registration">Inscrição estadual (se aplicável)</label>
+          <input id="state_registration" name="state_registration" class="form-control" maxlength="30">
+        </div>
+        <div class="col-md-4">
+          <label for="municipal_registration">Inscrição municipal (se aplicável)</label>
+          <input id="municipal_registration" name="municipal_registration" class="form-control" maxlength="30">
+        </div>
+        <div class="col-md-4">
+          <label for="tax_regime">Regime tributário</label>
+          <select id="tax_regime" name="tax_regime" class="form-select" required>
+            <option value="">Selecione</option>
+            <option value="simples_nacional">Simples Nacional</option>
+            <option value="lucro_presumido">Lucro Presumido</option>
+            <option value="lucro_real">Lucro Real</option>
+            <option value="mei">MEI</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label for="postal_code">CEP</label>
+          <input id="postal_code" name="postal_code" class="form-control" required inputmode="numeric" pattern="[0-9.-]{8,10}" maxlength="10" placeholder="00000-000">
+        </div>
+        <div class="col-md-6">
+          <label for="street">Logradouro</label>
+          <input id="street" name="street" class="form-control" required maxlength="200">
+        </div>
+        <div class="col-md-2">
+          <label for="street_number">Número</label>
+          <input id="street_number" name="street_number" class="form-control" required maxlength="20">
+        </div>
+        <div class="col-md-2">
+          <label for="district">Bairro</label>
+          <input id="district" name="district" class="form-control" required maxlength="100">
+        </div>
+        <div class="col-md-8">
+          <label for="city">Município</label>
+          <input id="city" name="city" class="form-control" required maxlength="100">
+        </div>
+        <div class="col-md-2">
+          <label for="state">UF</label>
+          <input id="state" name="state" class="form-control text-uppercase" required minlength="2" maxlength="2" pattern="[A-Za-z]{2}">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Salvar emitente</button>
+        </div>
+      </form>
+    </section>
+  {% endif %}
+
+  <section class="panel p-3 p-lg-4 mb-4">
+    <h2 class="card-title">Emitentes cadastrados</h2>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>Razão social</th><th>CNPJ</th><th>Localidade</th><th>Regime</th></tr></thead>
+        <tbody>
+          {% for issuer in issuers %}
+            <tr>
+              <td>{{ issuer.legal_name }}</td>
+              <td>{{ issuer.cnpj }}</td>
+              <td>{{ issuer.city }} / {{ issuer.state }}</td>
+              <td>{{ issuer.tax_regime|replace('_', ' ')|title }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center muted py-4">Nenhum emitente cadastrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel p-3 p-lg-4 mb-4">
+    <h2 class="card-title">Criar rascunho interno</h2>
+    <p class="muted">Disponível apenas para solicitações aprovadas que tenham orçamento e CNPJ cadastrado. A escolha NF-e/NFS-e serve apenas para organizar a preparação; não determina o enquadramento fiscal.</p>
+    {% if issuers and eligible_requests %}
+      <form method="post" action="{{ url_for('create_fiscal_draft') }}" class="row g-3">
+        <div class="col-lg-6">
+          <label for="request_id">Solicitação aprovada</label>
+          <select id="request_id" name="request_id" class="form-select" required>
+            <option value="">Selecione</option>
+            {% for item in eligible_requests %}
+              <option value="{{ item.id }}">{{ item.id }} — {{ item.title }} · {{ item.company_name }} · R$ {{ '%.2f'|format(item.final_total) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label for="issuer_id">Emitente</label>
+          <select id="issuer_id" name="issuer_id" class="form-select" required>
+            <option value="">Selecione</option>
+            {% for issuer in issuers %}
+              <option value="{{ issuer.id }}">{{ issuer.legal_name }} · {{ issuer.cnpj }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label for="document_type">Tipo a preparar</label>
+          <select id="document_type" name="document_type" class="form-select" required>
+            <option value="">Selecione</option>
+            <option value="nfe">NF-e — produtos</option>
+            <option value="nfse">NFS-e — serviços</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-outline-primary">Criar rascunho interno</button>
+        </div>
+      </form>
+    {% elif not issuers %}
+      <p class="mb-0">Cadastre um emitente para habilitar a preparação.</p>
+    {% else %}
+      <p class="mb-0">Não há solicitações aprovadas com orçamento e CNPJ do cliente para preparar.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel p-3 p-lg-4">
+    <h2 class="card-title">Rascunhos internos</h2>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>ID interno</th><th>Tipo</th><th>Solicitação</th><th>Emitente</th><th>Destinatário</th><th>Total de referência</th><th>Situação</th></tr></thead>
+        <tbody>
+          {% for draft in drafts %}
+            <tr>
+              <td>{{ draft.id }}</td>
+              <td>{{ 'NF-e' if draft.document_type == 'nfe' else 'NFS-e' }}</td>
+              <td>{{ draft.request_id }} — {{ draft.request_title }}</td>
+              <td>{{ draft.issuer_name }}</td>
+              <td>{{ draft.recipient_name }}</td>
+              <td>R$ {{ '%.2f'|format(draft.total) }}</td>
+              <td><span class="badge text-bg-warning">Rascunho interno — sem validade fiscal</span></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7" class="text-center muted py-4">Nenhum rascunho interno criado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

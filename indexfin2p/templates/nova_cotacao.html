@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Nova cotação | IndexFin{% endblock %}
+{% block content %}
+  <h1>Nova cotação - Solicitação {{ request.id }}</h1>
+  <p class="muted">{{ request.title }} · Cliente: {{ request.client_name }}</p>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    <div class="form-grid">
+      <div>
+        <label for="supplier_id">Fornecedor</label>
+        <select id="supplier_id" name="supplier_id" required>
+          <option value="">Selecione</option>
+          {% for supplier in suppliers %}
+            <option value="{{ supplier.id }}" {% if not supplier.cnpj %}disabled{% endif %}>{{ supplier.name }}{% if not supplier.cnpj %} (CNPJ pendente){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="total">Total da cotação (BRL)</label>
+        <input id="total" name="total" type="number" step="0.01" min="0" required>
+      </div>
+      <div>
+        <label for="lead_time_days">Prazo de entrega (dias)</label>
+        <input id="lead_time_days" name="lead_time_days" type="number" min="0" required>
+      </div>
+      <div>
+        <label for="payment_terms">Condições de pagamento</label>
+        <input id="payment_terms" name="payment_terms">
+      </div>
+    </div>
+
+    <h3>Itens cotados</h3>
+    {% for idx in range(1, 4) %}
+      <div class="form-grid">
+        <div>
+          <label for="item_{{ idx }}_description">Descrição {{ idx }}</label>
+          <input id="item_{{ idx }}_description" name="item_{{ idx }}_description">
+        </div>
+        <div>
+          <label for="item_{{ idx }}_quantity">Quantidade</label>
+          <input id="item_{{ idx }}_quantity" name="item_{{ idx }}_quantity" type="number" step="0.01" min="0">
+        </div>
+        <div>
+          <label for="item_{{ idx }}_unit">Unidade</label>
+          <input id="item_{{ idx }}_unit" name="item_{{ idx }}_unit" value="un">
+        </div>
+        <div>
+          <label for="item_{{ idx }}_unit_price">Preço unitário</label>
+          <input id="item_{{ idx }}_unit_price" name="item_{{ idx }}_unit_price" type="number" step="0.01" min="0">
+        </div>
+      </div>
+    {% endfor %}
+
+    <div>
+      <label for="notes">Observações</label>
+      <textarea id="notes" name="notes"></textarea>
+    </div>
+
+    <div class="inline-actions">
+      <button type="submit">Salvar cotação</button>
+      <a href="{{ url_for('detalhe_solicitacao', request_id=request.id) }}"><button type="button" class="secondary">Voltar</button></a>
+    </div>
+  </form>
+{% endblock %}

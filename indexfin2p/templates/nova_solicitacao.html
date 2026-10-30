@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Nova solicitação | IndexFin{% endblock %}
+{% block content %}
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Cadastro</p>
+      <h1 class="page-title mb-0">Nova solicitação</h1>
+    </div>
+  </div>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" class="form-card">
+    <div class="row g-3 mb-4">
+      <div class="col-md-6 col-xl-3">
+        <label for="title">Título</label>
+        <input id="title" name="title" class="form-control" required>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <label for="client_name">Cliente</label>
+        <input id="client_name" name="client_name" class="form-control" required>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <label for="company_id">Empresa</label>
+        <select id="company_id" name="company_id" class="form-select" required>
+          <option value="">Selecione</option>
+          {% for company in companies %}
+            <option value="{{ company.id }}">{{ company.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <label for="initial_budget">Orçamento inicial (BRL)</label>
+        <input id="initial_budget" name="initial_budget" type="number" step="0.01" min="0" value="0" class="form-control">
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <label for="status">Status</label>
+        <select id="status" name="status" class="form-select">
+          <option value="em cotação">Em cotação</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="em análise">Em análise</option>
+        </select>
+      </div>
+    </div>
+
+    <h3 class="card-title">Itens da solicitação</h3>
+    {% for idx in range(1, 4) %}
+      <div class="row g-3 mb-3">
+        <div class="col-md-6 col-xl-3">
+          <label for="item_{{ idx }}_description">Descrição {{ idx }}</label>
+          <input id="item_{{ idx }}_description" name="item_{{ idx }}_description" class="form-control">
+        </div>
+        <div class="col-md-3 col-xl-2">
+          <label for="item_{{ idx }}_quantity">Quantidade</label>
+          <input id="item_{{ idx }}_quantity" name="item_{{ idx }}_quantity" type="number" step="0.01" min="0" class="form-control">
+        </div>
+        <div class="col-md-3 col-xl-2">
+          <label for="item_{{ idx }}_unit">Unidade</label>
+          <input id="item_{{ idx }}_unit" name="item_{{ idx }}_unit" value="un" class="form-control">
+        </div>
+        <div class="col-md-6 col-xl-3">
+          <label for="item_{{ idx }}_unit_price">Preço estimado unitário</label>
+          <input id="item_{{ idx }}_unit_price" name="item_{{ idx }}_unit_price" type="number" step="0.01" min="0" class="form-control">
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="d-flex gap-2 flex-wrap mt-4">
+      <button type="submit" class="btn btn-primary">Salvar solicitação</button>
+      <a href="{{ url_for('solicitacoes') }}" class="btn btn-outline-primary">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

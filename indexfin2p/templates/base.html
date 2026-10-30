@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}IndexFin{% endblock %}</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='style.css', v=4) }}" rel="stylesheet">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-inline-flex align-items-center gap-2" href="{{ url_for('dashboard') if session.get('user_id') else url_for('login') }}">
+        <span class="brand-mark" aria-hidden="true">IF</span>
+        <span>IndexFin</span>
+      </a>
+      
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavigation">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-1 gap-lg-1">
+          {% if session.get('user_id') %}
+            
+            <li class="nav-item">
+              <a class="nav-link{% if request.endpoint == 'dashboard' %} active{% endif %}" href="{{ url_for('dashboard') }}">
+                <i class="bi bi-house-door-fill me-2" aria-hidden="true"></i>Início
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link{% if request.endpoint == 'solicitacoes' %} active{% endif %}" href="{{ url_for('solicitacoes') }}">
+                <i class="bi bi-file-earmark-text-fill me-2" aria-hidden="true"></i>Solicitações
+              </a>
+            </li>
+
+
+            {% if session.get('role') == 'admin' %}
+              <li class="nav-item">
+                <a class="nav-link{% if request.endpoint == 'usuarios' %} active{% endif %}" href="{{ url_for('usuarios') }}">
+                  <i class="bi bi-people-fill me-2" aria-hidden="true"></i>Usuários
+                </a>
+              </li>
+            {% endif %}
+
+            {% if session.get('role') in ['admin', 'operador_financeiro'] %}
+              <li class="nav-item">
+                <a class="nav-link{% if request.endpoint == 'fiscal_page' %} active{% endif %}" href="{{ url_for('fiscal_page') }}">
+                  <i class="bi bi-receipt me-2" aria-hidden="true"></i>Preparação fiscal
+                </a>
+              </li>
+            {% endif %}
+
+          
+            {% if session.get('role') in ['admin', 'operador', 'operador_comercial', 'operador_financeiro'] %}
+              <li class="nav-item">
+                <a class="nav-link{% if request.endpoint == 'nova_solicitacao' %} active{% endif %}" href="{{ url_for('nova_solicitacao') }}">
+                  <i class="bi bi-plus-circle-fill me-2" aria-hidden="true"></i>Nova solicitação
+                </a>
+              </li>
+            {% endif %}
+
+
+            <li class="nav-item ms-lg-3 my-2 my-lg-0">
+              <span class="user-pill d-inline-flex align-items-center gap-2">
+                <span class="user-avatar" aria-hidden="true">{{ session.get('full_name', 'U')[:1]|upper }}</span>
+                <span>{{ session.get('full_name') }} <small class="text-white-50">· {{ session.get('role') }}</small></span>
+              </span>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link text-white-50 ms-lg-2" href="{{ url_for('logout') }}" title="Sair do sistema" aria-label="Sair do sistema">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i><span class="d-lg-none ms-2">Sair</span>
+              </a>
+            </li>
+
+          {% else %}
+        
+            <li class="nav-item">
+              <a class="nav-link btn btn-primary px-4 py-2" href="{{ url_for('login') }}">
+                <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Entrar no Painel
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4 my-lg-5">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script>
+    document.querySelectorAll('[data-document]').forEach((input) => {
+      const feedback = input.closest('.col-12')?.querySelector('.document-feedback')
+        || input.closest('td')?.querySelector('.document-feedback')
+        || input.closest('form').querySelector('.document-feedback');
+      const kind = input.dataset.document;
+      const clean = (value) => value.replace(kind === 'cpf' ? /\D/g : /[^a-z\d]/gi, '').toUpperCase()
+        .slice(0, kind === 'cpf' ? 11 : 14);
+      const validCpf = (value) => {
+        if (!/^\d{11}$/.test(value) || /^(\d)\1+$/.test(value)) return false;
+        const digit = (length, factor) => {
+          let sum = 0;
+          for (let i = 0; i < length; i++) sum += Number(value[i]) * (factor - i);
+          const result = (sum * 10) % 11;
+          return result === 10 ? 0 : result;
+        };
+        return digit(9, 10) === Number(value[9]) && digit(10, 11) === Number(value[10]);
+      };
+      const validCnpj = (value) => {
+        if (!/^[A-Z\d]{12}\d{2}$/.test(value) || /^([A-Z\d])\1{11}\d{2}$/.test(value)) return false;
+        const digit = (part, weights) => {
+          const sum = [...part].reduce((total, char, index) =>
+            total + (char.charCodeAt(0) - 48) * weights[index], 0);
+          return sum % 11 < 2 ? 0 : 11 - (sum % 11);
+        };
+        const first = digit(value.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+        const second = digit(value.slice(0, 12) + first, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+        return value.slice(12) === `${first}${second}`;
+      };
+      const validate = () => {
+        const value = clean(input.value);
+        let formatted;
+        if (kind === 'cpf') {
+          formatted = value.slice(0, 3);
+          if (value.length > 3) formatted += `.${value.slice(3, 6)}`;
+          if (value.length > 6) formatted += `.${value.slice(6, 9)}`;
+          if (value.length > 9) formatted += `-${value.slice(9, 11)}`;
+        } else {
+          formatted = value.slice(0, 2);
+          if (value.length > 2) formatted += `.${value.slice(2, 5)}`;
+          if (value.length > 5) formatted += `.${value.slice(5, 8)}`;
+          if (value.length > 8) formatted += `/${value.slice(8, 12)}`;
+          if (value.length > 12) formatted += `-${value.slice(12, 14)}`;
+        }
+        input.value = formatted;
+        const valid = kind === 'cpf' ? validCpf(value) : validCnpj(value);
+        const hasValue = value.length > 0;
+        feedback.textContent = hasValue ? `${kind.toUpperCase()} ${valid ? 'válido.' : 'inválido.'}` : '';
+        feedback.classList.toggle('document-valid', hasValue && valid);
+        feedback.classList.toggle('document-invalid', hasValue && !valid);
+        input.setCustomValidity(hasValue && !valid ? `Informe um ${kind.toUpperCase()} válido.` : '');
+      };
+      input.addEventListener('input', validate);
+      input.addEventListener('blur', validate);
+      if (input.value) validate();
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

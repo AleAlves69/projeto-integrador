@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% block title %}Usuários | IndexFin{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <p class="eyebrow">Administração</p>
+    <h1 class="page-title">Usuários e empresas</h1>
+    <p class="muted mb-0">Cada pessoa acessa com seu próprio login, senha e vínculo empresarial.</p>
+  </div>
+
+  {% if error %}
+    <div class="error" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <section class="panel h-100">
+        <h2 class="card-title">Criar usuário</h2>
+        <form method="post" action="{{ url_for('usuarios') }}" class="row g-3">
+          <div class="col-md-6">
+            <label for="full_name">Nome completo</label>
+            <input id="full_name" name="full_name" class="form-control" required minlength="2">
+          </div>
+          <div class="col-md-6">
+            <label for="username">Login</label>
+            <input id="username" name="username" class="form-control" required minlength="3" maxlength="50" autocomplete="off">
+          </div>
+          <div class="col-md-6">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label for="cpf">CPF</label>
+            <input id="cpf" name="cpf" class="form-control" required inputmode="numeric" autocomplete="off" placeholder="___.___.___-__" maxlength="14" data-document="cpf">
+            <small class="document-feedback" aria-live="polite"></small>
+          </div>
+          <div class="col-md-6">
+            <label for="password">Senha inicial</label>
+            <input id="password" name="password" type="password" class="form-control" required minlength="8" autocomplete="new-password">
+          </div>
+          <div class="col-md-6">
+            <label for="role">Papel</label>
+            <select id="role" name="role" class="form-select" required>
+              <option value="">Selecione um papel</option>
+              {% for role in roles %}
+                <option value="{{ role }}">{{ role.replace('_', ' ')|title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 d-flex align-items-end">
+            <label class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="confirm_admin" value="sim">
+              <span class="form-check-label">Confirmo criação de administrador, se selecionado</span>
+            </label>
+          </div>
+          <div class="col-md-6">
+            <label for="company_id">Empresa</label>
+            <select id="company_id" name="company_id" class="form-select">
+              <option value="">Sem vínculo empresarial</option>
+              {% for company in companies %}
+                <option value="{{ company.id }}">{{ company.name }}{% if not company.cnpj %} (CNPJ pendente){% endif %}</option>
+              {% endfor %}
+            </select>
+            <small class="muted">Obrigatório para contas de cliente.</small>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary">Criar conta</button>
+          </div>
+        </form>
+        <p class="muted small mt-3 mb-0">As senhas são armazenadas com hash e não podem ser consultadas. Para trocar uma senha, use a opção de redefinição.</p>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="panel h-100">
+        <h2 class="card-title">Cadastrar empresa</h2>
+        <form method="post" action="{{ url_for('criar_empresa') }}" class="row g-3">
+          <div class="col-12">
+            <label for="company_name">Nome da empresa</label>
+            <input id="company_name" name="name" class="form-control" required minlength="2">
+          </div>
+          <div class="col-12">
+            <label for="company_cnpj_new">CNPJ</label>
+            <input id="company_cnpj_new" name="cnpj" class="form-control" required inputmode="text" autocomplete="off" placeholder="__.___.___/____-__" maxlength="18" data-document="cnpj">
+            <small class="document-feedback" aria-live="polite"></small>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-outline-primary">Adicionar empresa</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel p-3 p-lg-4 mb-4">
+    <h2 class="card-title">CNPJ das empresas existentes</h2>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>Empresa</th><th>CNPJ cadastrado</th><th>Atualizar CNPJ</th><th></th></tr></thead>
+        <tbody>
+          {% for company in companies %}
+            <tr>
+              <td>{{ company.name }}</td>
+              <td>{{ company.cnpj or 'Pendente' }}</td>
+              <td colspan="2">
+                <form method="post" action="{{ url_for('editar_empresa', company_id=company.id) }}" class="d-flex flex-wrap gap-2">
+                  <input name="cnpj" class="form-control flex-grow-1" value="{{ company.cnpj or '' }}" required inputmode="text" autocomplete="off" placeholder="__.___.___/____-__" maxlength="18" data-document="cnpj" aria-label="CNPJ de {{ company.name }}">
+                  <button type="submit" class="btn btn-outline-primary">Salvar CNPJ</button>
+                </form>
+                <small class="document-feedback" aria-live="polite"></small>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-center muted py-4">Nenhuma empresa cadastrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-4">
+      <section class="panel h-100">
+        <h2 class="card-title">Cadastrar fornecedor</h2>
+        <form method="post" action="{{ url_for('criar_fornecedor') }}" class="row g-3">
+          <div class="col-12">
+            <label for="supplier_name">Nome do fornecedor</label>
+            <input id="supplier_name" name="name" class="form-control" required minlength="2">
+          </div>
+          <div class="col-12">
+            <label for="supplier_cnpj">CNPJ</label>
+            <input id="supplier_cnpj" name="cnpj" class="form-control" required inputmode="text" autocomplete="off" placeholder="__.___.___/____-__" maxlength="18" data-document="cnpj">
+            <small class="document-feedback" aria-live="polite"></small>
+          </div>
+          <div class="col-12">
+            <label for="supplier_category">Categoria (opcional)</label>
+            <input id="supplier_category" name="category" class="form-control">
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-outline-primary">Adicionar fornecedor</button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <div class="col-lg-8">
+      <section class="panel h-100">
+        <h2 class="card-title">CNPJ dos fornecedores existentes</h2>
+        <div class="table-wrap">
+          <table class="table table-hover mb-0 align-middle">
+            <thead><tr><th>Fornecedor</th><th>CNPJ</th><th>Atualizar CNPJ</th></tr></thead>
+            <tbody>
+              {% for supplier in suppliers %}
+                <tr>
+                  <td>{{ supplier.name }}</td>
+                  <td>{{ supplier.cnpj or 'Pendente' }}</td>
+                  <td>
+                    <form method="post" action="{{ url_for('editar_fornecedor', supplier_id=supplier.id) }}" class="d-flex flex-wrap gap-2">
+                      <input name="cnpj" class="form-control flex-grow-1" value="{{ supplier.cnpj or '' }}" required inputmode="text" autocomplete="off" placeholder="__.___.___/____-__" maxlength="18" data-document="cnpj" aria-label="CNPJ de {{ supplier.name }}">
+                      <button type="submit" class="btn btn-outline-primary">Salvar</button>
+                    </form>
+                    <small class="document-feedback" aria-live="polite"></small>
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="3" class="text-center muted py-4">Nenhum fornecedor cadastrado.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel p-3 p-lg-4 mb-4">
+    <div class="section-head">
+      <h2 class="card-title mb-0">Todos os usuários ({{ users|length }})</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>Login</th>
+            <th>Papel</th>
+            <th>Empresa</th>
+            <th>Status</th>
+            <th>Ações administrativas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <td>{{ user.full_name }}<br><small class="muted">{{ user.email or 'Sem e-mail' }} · CPF: {{ user.cpf_masked or 'Pendente' }}</small></td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.role.replace('_', ' ')|title }}</td>
+              <td>{{ user.company_name or 'Sem vínculo' }}</td>
+              <td>
+                <span class="status-badge">{{ 'Ativo' if user.active else 'Inativo' }}</span>
+                {% if user.role in mfa_roles %}
+                  <br><small class="muted">TOTP: {{ 'Ativo' if user.totp_enabled else 'Pendente' }}</small>
+                {% endif %}
+              </td>
+              <td>
+                <details id="user-manager-{{ user.username }}">
+                  <summary class="btn btn-sm btn-outline-primary">Gerenciar</summary>
+                  <div class="pt-3" style="min-width: 260px">
+                    <form method="post" action="{{ url_for('editar_usuario', user_id=user.id) }}" class="vstack gap-2 mb-3">
+                      <label for="name-{{ user.id }}">Nome</label>
+                      <input id="name-{{ user.id }}" name="full_name" value="{{ user.full_name }}" class="form-control" required>
+                      <label for="email-{{ user.id }}">E-mail</label>
+                      <input id="email-{{ user.id }}" name="email" type="email" value="{{ user.email or '' }}" class="form-control">
+                      <label for="cpf-{{ user.id }}">Novo CPF (opcional)</label>
+                      <input id="cpf-{{ user.id }}" name="cpf" class="form-control" inputmode="numeric" autocomplete="off" placeholder="Digite para cadastrar ou alterar" maxlength="14" data-document="cpf">
+                      <small class="document-feedback" aria-live="polite"></small>
+                      <label for="cpf-reason-{{ user.id }}">Justificativa para cadastrar ou alterar CPF</label>
+                      <input id="cpf-reason-{{ user.id }}" name="cpf_reason" class="form-control">
+                      <label for="role-{{ user.id }}">Papel</label>
+                      <select id="role-{{ user.id }}" name="role" class="form-select" required>
+                        {% for role in roles %}
+                          <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ role.replace('_', ' ')|title }}</option>
+                        {% endfor %}
+                      </select>
+                      <label for="role-reason-{{ user.id }}">Justificativa para mudança de papel</label>
+                      <textarea id="role-reason-{{ user.id }}" name="role_reason" class="form-control" rows="2"></textarea>
+                      <label class="form-check">
+                        <input class="form-check-input" type="checkbox" name="confirm_admin" value="sim">
+                        <span class="form-check-label">Confirmo promoção para administrador, se selecionada</span>
+                      </label>
+                      <label for="company-{{ user.id }}">Empresa</label>
+                      <select id="company-{{ user.id }}" name="company_id" class="form-select">
+                        <option value="">Sem vínculo empresarial</option>
+                        {% for company in companies %}
+                          <option value="{{ company.id }}" {% if user.company_id == company.id %}selected{% endif %}>{{ company.name }}{% if not company.cnpj %} (CNPJ pendente){% endif %}</option>
+                        {% endfor %}
+                      </select>
+                      <button class="btn btn-sm btn-primary" type="submit">Salvar alterações</button>
+                    </form>
+
+                    <form method="post" action="{{ url_for('alterar_status_usuario', user_id=user.id) }}" class="vstack gap-2 mb-3">
+                      {% if user.active %}
+                        <label for="reason-{{ user.id }}">Motivo para inativar</label>
+                        <input id="reason-{{ user.id }}" name="reason" class="form-control" required>
+                        <button class="btn btn-sm btn-outline-danger" name="action" value="inativar" type="submit">Inativar conta</button>
+                      {% else %}
+                        <button class="btn btn-sm btn-outline-success" name="action" value="ativar" type="submit">Reativar conta</button>
+                      {% endif %}
+                    </form>
+
+                    <form method="post" action="{{ url_for('redefinir_senha_usuario', user_id=user.id) }}" class="vstack gap-2">
+                      <label for="password-{{ user.id }}">Nova senha (mínimo 8 caracteres)</label>
+                      <input id="password-{{ user.id }}" name="password" type="password" minlength="8" class="form-control" required autocomplete="new-password">
+                      <button class="btn btn-sm btn-outline-primary" type="submit">Redefinir senha</button>
+                    </form>
+                    {% if user.role in mfa_roles %}
+                      <form method="post" action="{{ url_for('redefinir_totp_usuario', user_id=user.id) }}" class="mt-2">
+                        <button class="btn btn-sm btn-outline-warning" type="submit">Redefinir autenticador TOTP</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </details>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="text-center muted py-4">Nenhum usuário cadastrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel p-3 p-lg-4 mb-4">
+    <h2 class="card-title">Cadastros aguardando aprovação ({{ access_requests|length }})</h2>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>Data</th><th>Nome</th><th>Login</th><th>E-mail</th><th>Tipo</th><th>Empresa</th><th>CNPJ</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for access in access_requests %}
+            <tr>
+              <td>{{ access.created_at }}</td>
+              <td>{{ access.full_name }}</td>
+              <td>{{ access.username }}</td>
+              <td>{{ access.email }}</td>
+              <td>{{ access.role.replace('_', ' ')|title }}</td>
+              <td>{{ access.company_name or '—' }}</td>
+              <td>{{ access.company_cnpj or '—' }}</td>
+              <td>
+                <form method="post" action="{{ url_for('revisar_acesso', request_id=access.id) }}" class="d-flex gap-2">
+                  <button class="btn btn-sm btn-primary" name="action" value="aprovar" type="submit">Aprovar</button>
+                  <button class="btn btn-sm btn-outline-danger" name="action" value="recusar" type="submit">Recusar</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="8" class="text-center muted py-4">Nenhum cadastro pendente.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel p-3 p-lg-4 mb-4">
+    <h2 class="card-title">Solicitações de recuperação de senha ({{ password_reset_requests|length }})</h2>
+    <p class="muted">Confirme a identidade da pessoa fora do sistema e redefina a senha no menu “Gerenciar” do usuário. A redefinição encerra a solicitação.</p>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>Data</th><th>Login</th><th>Usuário</th><th>E-mail da conta</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for recovery in password_reset_requests %}
+            <tr>
+              <td>{{ recovery.created_at }}</td>
+              <td>{{ recovery.username }}</td>
+              <td>{{ recovery.full_name or 'Conta não localizada' }}</td>
+              <td>{{ recovery.account_email or '—' }}</td>
+              <td>
+                {% if recovery.full_name %}
+                  <a class="btn btn-sm btn-outline-primary" href="#user-manager-{{ recovery.username }}">Ir para usuário</a>
+                {% endif %}
+                <form method="post" action="{{ url_for('dispensar_recuperacao_senha', request_id=recovery.id) }}" class="d-inline">
+                  <button class="btn btn-sm btn-outline-secondary" type="submit">Dispensar</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-center muted py-4">Nenhuma recuperação pendente.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel p-3 p-lg-4">
+    <h2 class="card-title">Atividade administrativa recente</h2>
+    <div class="table-wrap">
+      <table class="table table-hover mb-0 align-middle">
+        <thead><tr><th>Data</th><th>Ação</th><th>Usuário</th><th>Empresa</th><th>Detalhes</th></tr></thead>
+        <tbody>
+          {% for change in recent_changes %}
+            <tr>
+              <td>{{ change.created_at }}</td>
+              <td>{{ change.action.replace('_', ' ')|title }}</td>
+              <td>{{ change.target_username or '—' }}</td>
+              <td>{{ change.company_name or '—' }}</td>
+              <td>{{ change.details }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-center muted py-4">Nenhuma alteração registrada.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}
